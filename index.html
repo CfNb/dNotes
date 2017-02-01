@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="css/topcoat-desktop-dark.min.css"/>
+<link  id="hostStyle" rel="stylesheet" href="css/styles.css"/>
+
+<title></title>
+</head>
+
+<body class="hostElt">
+    <div id="content">        
+        <!--
+        <div>                
+            <div>
+                <input id="toSend" type="text" name="text" style="width:96%; margin-left:2%" value="type note here">
+                
+                <button id="send_text" class="topcoat-button--cta" style="width:49%; margin-left:51%">Send to Server</button>
+                
+            </div>
+            <div style="padding-left:5px; margin-top:10px">
+                <div id="theResult" class="topcoat-notification">server response will show up here</div>
+            </div>
+        </div>  
+
+        <br />
+        <hr>
+        <br />
+        -->
+
+        <div id="noteDisplay">
+            <div id="notes" class="topcoat-tab-bar full">
+                <ul class="tabs full">
+                    <li tabset="notes" data-tab="tabCustomer" class="current">
+                        <button class="topcoat-tab-bar__button full">Customer</button>
+                    </li>
+                    <li tabset="notes" data-tab="tabJob">
+                        <button class="topcoat-tab-bar__button full">Job</button>
+                    </li>
+                    <li tabset="notes" data-tab="tabItem">
+                        <button class="topcoat-tab-bar__button full">Item</button>
+                    </li>
+                </ul>
+            </div>
+            
+            <button id="currentID" class="topcoat-button--quiet">ID</button>
+            
+            <div id="tabCustomer" class="tab-content current">
+                
+                <button class="topcoat-button--quiet" style="width:18px; padding-left: 5px;">X</button>
+                <span class="highlight">12/16/16 - RS &nbsp;&nbsp;</span>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                <br><br>
+                <button class="topcoat-button--quiet">X</button>
+                <span class="highlight">12/17/16 - RS &nbsp;&nbsp;</span>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                <br><br>
+                <button id="Customer" class="addNote topcoat-button">+</button>
+                
+            </div>
+            <div id="tabJob" class="tab-content">
+                
+                <button class="topcoat-button--quiet">X</button>
+                <span class="highlight">01/26/17 - RS &nbsp;&nbsp;</span>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                <br><br>
+                <button id="Job" class="addNote topcoat-button">+</button>
+                
+            </div>
+            <div id="tabItem" class="tab-content">
+                
+                <button class="topcoat-button--quiet">X</button>
+                <span class="highlight">01/26/17 - RS &nbsp;&nbsp;</span>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                <br><br>
+                <button id="Item" class="addNote topcoat-button">+</button>
+                
+            </div>
+        </div>
+        
+        <div id="newNoteUI">
+            <textarea id="newNote" class="topcoat-textarea" rows="8" cols="36" placeholder=""></textarea>
+            <button id="addNote" class="topcoat-button--cta">Add Note</button>
+            <button id="cancelAddNote" class="topcoat-button">Cancel</button>
+        </div>
+        
+         <div id="getUserID">
+            <input id="userID" type="text" class="topcoat-text-input" placeholder="" value="">
+            <button id="setUserID" class="topcoat-button--cta">Save ID</button>
+        </div>
+        
+        <div id="notifier" class="topcoat-notification">
+            <p id="notifierText"></p>
+            <button id="notifierClose" class="topcoat-button--cta">OK</button>
+        </div>
+        
+
+        <!--checklist section
+        
+        <br />
+        
+        <select class="topcoat-select">
+            <option value="item type"><span class="highlight">item type</span></option>
+            <option value="volvo">Volvo</option>
+            <option value="saab">Saab</option>
+            <option value="mercedes">Mercedes</option>
+            <option value="audi">Audi</option>
+        </select>
+        <br />
+        
+        <label class="topcoat-checkbox"><input type="checkbox">
+            <div class="topcoat-checkbox__checkmark"></div>
+            Unwind Verified
+        </label>
+        <br />
+        <label class="topcoat-radio-button">
+            <input type="radio" name="dieline">
+            <div class="topcoat-radio-button__checkmark"></div>
+            Used Supplied&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="dieline">
+            <div class="topcoat-radio-button__checkmark"></div>
+            Resized per Ticket&nbsp;&nbsp;&nbsp;
+        </label>
+        <br />
+        <label class="topcoat-checkbox"><input type="checkbox">
+            <div class="topcoat-checkbox__checkmark"></div>
+            Dims Match Ticket
+        </label>
+        <br />
+        <label class="topcoat-radio-button">
+            <input type="radio" name="topcoat">
+            <div class="topcoat-radio-button__checkmark"></div>
+            &nbsp;Right label&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="topcoat">
+            <div class="topcoat-radio-button__checkmark"></div>
+            &nbsp;test label&nbsp;&nbsp;&nbsp;
+        </label>
+
+        -->
+        
+    </div>
+    
+    <script src="js/libs/CSInterface.js"></script>
+    <script src="js/libs/jquery-2.0.2.min.js"></script>
+
+    <script src="js/themeManager.js"></script>
+    <script src="js/activeManager.js"></script>
+    <script src="js/notes.js"></script>
+    <script src="js/main.js"></script>
+
+</body>
+</html>

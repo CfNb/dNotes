@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<ExtensionList>
+    <Extension Id="com.rps.dnotes">
+        <HostList>
+            
+            <!-- Illustrator -->
+            <Host Name="ILST" Port="8182"/>
+          
+        </HostList>
+    </Extension>
+</ExtensionList>
+ 
