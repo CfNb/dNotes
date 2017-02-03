@@ -46,29 +46,28 @@
             <button id="currentID" class="topcoat-button--quiet">ID</button>
             
             <div id="tabCustomer" class="tab-content current">
-                
-                <button class="topcoat-button--quiet" style="width:18px; padding-left: 5px;">X</button>
-                <span class="highlight">12/16/16 - RS &nbsp;&nbsp;</span>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                <br><br>
-                <button class="topcoat-button--quiet">X</button>
-                <span class="highlight">12/17/16 - RS &nbsp;&nbsp;</span>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                <br><br>
+                <div class="note">
+                    <button class="topcoat-button--quiet xButton">X</button>
+                    <span class="noteHighlight">12/16/16 - RS</span>Lorem ipsum.
+                </div>
+                <div class="note">
+                    <button class="topcoat-button--quiet xButton">X</button>
+                    <span class="noteHighlight">12/17/16 - RS</span>Lorem ipsum dolor sit.
+                </div>
                 <button id="Customer" class="addNote topcoat-button">+</button>
-                
             </div>
             <div id="tabJob" class="tab-content">
-                
-                <button class="topcoat-button--quiet">X</button>
-                <span class="highlight">01/26/17 - RS &nbsp;&nbsp;</span>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                <br><br>
+                <div class="note">
+                    <button class="topcoat-button--quiet xButton">X</button>
+                    <span class="noteHighlight">01/26/17 - RS</span>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                </div>
                 <button id="Job" class="addNote topcoat-button">+</button>
-                
             </div>
             <div id="tabItem" class="tab-content">
-                
-                <button class="topcoat-button--quiet">X</button>
-                <span class="highlight">01/26/17 - RS &nbsp;&nbsp;</span>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                <br><br>
+                <div class="note">
+                    <button class="topcoat-button--quiet xButton">X</button>
+                    <span class="noteHighlight">01/26/17 - RS</span>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                </div>
                 <button id="Item" class="addNote topcoat-button">+</button>
                 
             </div>
@@ -80,12 +79,13 @@
             <button id="cancelAddNote" class="topcoat-button">Cancel</button>
         </div>
         
-         <div id="getUserID">
-            <input id="userID" type="text" class="topcoat-text-input" placeholder="" value="">
+         <div id="getUserID" class="dPopup">
+            <p>Please enter your initials.</p>
+            <input id="userID" type="text" class="topcoat-text-input" maxlength="3" placeholder="" value="" pattern="^[A-Z]{2,3}$">
             <button id="setUserID" class="topcoat-button--cta">Save ID</button>
         </div>
         
-        <div id="notifier" class="topcoat-notification">
+        <div id="notifier" class="topcoat-notification dPopup">
             <p id="notifierText"></p>
             <button id="notifierClose" class="topcoat-button--cta">OK</button>
         </div>

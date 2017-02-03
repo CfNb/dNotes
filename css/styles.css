@@ -11,7 +11,7 @@
     width:100%;
 }
 
-button:focus{
+button:focus {
     outline:0 !important;
 }
 
@@ -35,7 +35,7 @@ by the settings of the CC application
 .hostElt{}
 
 
-.hostButton{
+.hostButton {
     border:1px solid;
     border-radius:2px;
     height:20px;
@@ -45,27 +45,28 @@ by the settings of the CC application
     font-size:inherit;
 }
 
-.highlight{
+.noteHighlight {
     color: whitesmoke;
+    display: block;
 }
 
-ul.tabs{
+ul.tabs {
     margin: 0px;
     padding: 0px;
     list-style: none;
 }
-ul.tabs li{
+ul.tabs li {
     background: none;
     color: #222;
     display: inline-block;
     cursor: pointer;
 }
 
-ul.tabs li.current button{
+ul.tabs li.current button {
     background-color:#3f4041;
 }
 
-.tab-content{
+.tab-content {
     display: none;
     background: #3f4041;
     padding: 8px;
@@ -74,12 +75,29 @@ ul.tabs li.current button{
     overflow: auto;
 }
 
-.tab-content button{
+.tab-content button {
     float: left;
 }
 
-.tab-content.current{
+.tab-content.current {
     display: inherit;
+}
+
+.note {
+    margin-bottom: 6px;
+}
+
+.note button {
+    width: 30px;
+    padding: 0px;
+    text-align: center;
+}
+
+.note button:hover span {
+    display: none;
+}
+.note button:hover:before {
+    content: "X";
 }
 
 #newNoteUI {
@@ -101,12 +119,25 @@ ul.tabs li.current button{
     padding: 2px 5px 3px 5px;
 }
 
+.dPopup {
+    position: absolute;
+    top: 40px;
+    left: 25%;
+    right: 25%;
+    text-align: center;
+    white-space: normal;
+    overflow: auto;
+    padding-left: 10px;
+    padding-right 10px;
+}
+
 #getUserID {
     display: none;
-    position: absolute;
-    top: 4px;
-    left: 6px;
-    right:6px;
+    padding-bottom: 20px;
+}
+
+#userID {
+    width: 50px;
 }
 
 #currentID {
@@ -117,15 +148,6 @@ ul.tabs li.current button{
 
 #notifier {
     display: none;
-    position: absolute;
-    top: 40px;
-    left: 25%;
-    right: 25%;
-    text-align: center;
-    white-space: normal;
-    overflow: auto;
-    padding-left: 10px;
-    padding-right 10px;
 }
 
 #notifierText {
