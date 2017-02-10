@@ -32,13 +32,13 @@
             <div id="notes" class="topcoat-tab-bar full">
                 <ul class="tabs full">
                     <li tabset="notes" data-tab="tabCustomer" class="current">
-                        <button class="topcoat-tab-bar__button full">Customer</button>
+                        <button id="CustomerTabLbl" class="topcoat-tab-bar__button full">Customer</button>
                     </li>
                     <li tabset="notes" data-tab="tabJob">
-                        <button class="topcoat-tab-bar__button full">Job</button>
+                        <button id="JobTabLbl" class="topcoat-tab-bar__button full">Job</button>
                     </li>
                     <li tabset="notes" data-tab="tabItem">
-                        <button class="topcoat-tab-bar__button full">Item</button>
+                        <button id="ItemTabLbl" class="topcoat-tab-bar__button full">Item</button>
                     </li>
                 </ul>
             </div>
@@ -46,36 +46,23 @@
             <button id="currentID" class="topcoat-button--quiet">ID</button>
             
             <div id="tabCustomer" class="tab-content current">
-                <div class="note">
-                    <button class="topcoat-button--quiet xButton">X</button>
-                    <span class="noteHighlight">12/16/16 - RS</span>Lorem ipsum.
-                </div>
-                <div class="note">
-                    <button class="topcoat-button--quiet xButton">X</button>
-                    <span class="noteHighlight">12/17/16 - RS</span>Lorem ipsum dolor sit.
-                </div>
-                <button id="Customer" class="addNote topcoat-button">+</button>
             </div>
             <div id="tabJob" class="tab-content">
-                <div class="note">
-                    <button class="topcoat-button--quiet xButton">X</button>
-                    <span class="noteHighlight">01/26/17 - RS</span>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                </div>
-                <button id="Job" class="addNote topcoat-button">+</button>
             </div>
             <div id="tabItem" class="tab-content">
+                <!--
                 <div class="note">
                     <button class="topcoat-button--quiet xButton">X</button>
                     <span class="noteHighlight">01/26/17 - RS</span>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
                 </div>
                 <button id="Item" class="addNote topcoat-button">+</button>
-                
+                -->
             </div>
         </div>
         
         <div id="newNoteUI">
             <textarea id="newNote" class="topcoat-textarea" rows="8" cols="36" placeholder=""></textarea>
-            <button id="addNote" class="topcoat-button--cta">Add Note</button>
+            <button id="addNote" class="topcoat-button--cta" kind="Customer">Add Note</button>
             <button id="cancelAddNote" class="topcoat-button">Cancel</button>
         </div>
         

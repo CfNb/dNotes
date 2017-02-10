@@ -2,6 +2,9 @@
 /*global $, Folder*/
 
 
-function sayHello(){
-    alert("hello from ExtendScript, doc was activated!");
+//returns url of active document
+function docURL(){
+
 }
+
+

@@ -6,143 +6,83 @@ $(document).ready(function () {
     
     var csInterface = new CSInterface();
     
+    var userID;
+    //var urlFullRegex = new RegExp(/^file:\/\/\/Volumes\/.*\/\d{6}-.*-.*\/Indigo - Job \d{6}\/\d{6}-\d{1,2}-\d{5}.{0,3}\.ai$/);
+    var urlFolderRegex = new RegExp(/^file:\/\/\/Volumes\/.*\/\d{6}-.*-.*\/Indigo - Job \d{6}\/.*\.ai$/);
+    var fileNameRegex = new RegExp(/^\d{6}-\d{1,2}(_\d{1,2}|)-\d{5}(_.+|)-[PJV]\d{1,2}\.(ai|pdf)$/);
+    
     function init() {
         themeManager.init();
     }
-    init();
-    
-    function listenForActive() {
-        activeManager.init();
-    }
-    listenForActive();
-    
-    var userID;
-    function setUserID(uid, storeBool) {
-        userID = uid;
-        $('#currentID').text(uid);
-        if (storeBool) {localStorage.setItem("userid", uid); }
-        console.log('User ID set to ' + uid);
-    }
-
-    // info stored in localStorage
-    // on mac: ~/library/Caches/CSXS/cep_cache
-    if (typeof (Storage) !== "undefined") {
-        if (localStorage.getItem("userid") === null) {
-            console.log('need user ID');
-            $('#noteDisplay').hide();
-            $('#getUserID').show();
-        } else {
-            setUserID(localStorage.userid, false);
-        }
-    } else {
-        console.log('Sorry! No Web Storage support...');
-        setUserID('??', false);
-    }
-    
-    $('#setUserID').click(function () {
-        setUserID($('#userID').val(), true);
-        $('#getUserID').hide();
-        $('#noteDisplay').show();
-	});
-    
-    $('#currentID').click(function () {
-        $('#noteDisplay').hide();
-        $('#getUserID').show();
-    });
-    
-    
     
     //send get request with identifiers to server, get notes back
     function noteGet(customer, job, item, callback) {
         $.get('http://digital:8080/noteget', {customer: customer, job: job, item: item}, function (data) {
             console.log('noteGet:success');
-            console.log(data);
+            //console.log(data);
             callback(data);
         }).fail(function () {
             $('#theResult').html('error');
-            console.log('fail');
+            console.log('noteGet failed');
+            $('#notifierText').text('Notes could not be retrieved from the server.');
+            $('#notifier').show();
             return 'error';
         });
     }
     
-    function xButton(initials, noteID) {
+    function xButton(initials, noteKind, noteID) {
         if (initials !== userID) {
-            return '<button class="topcoat-button--quiet" disabled>' + initials + '</button>';
+            return '<button class="topcoat-button--quiet" kind="' + noteKind + '" disabled>' + initials + '</button>';
         } else {
-            return '<button id="' + noteID + '" class="topcoat-button--quiet"><span>' + initials + '</span></button>';
+            return '<button id="' + noteID + '" class="topcoat-button--quiet" kind="' + noteKind + '"><span>' + initials + '</span></button>';
         }
     }
     
-    // refresh tab content using new data
+    // refreshes tab content using new data
     function refreshTab(noteKind, dataArr) {
+        console.log('refreshTab-');
+        console.log('noteKind: ' + noteKind);
         if (dataArr !== 'error') {
             var rebuiltTab = '';
             var i;
-            for (i = 0; i < dataArr.length; i++) {
-                rebuiltTab += '<div class="note">' + xButton(dataArr[i].author, dataArr[i]._id);
-                rebuiltTab += '<span class="noteHighlight">' + dataArr[i].date + '</span>' + dataArr[i].content + '</div>';
+            var noteCount = dataArr.length;
+            for (i = 0; i < noteCount; i++) {
+                rebuiltTab += '<div class="note">' + xButton(dataArr[i].author, noteKind, dataArr[i]._id);
+                rebuiltTab += '<span class="noteHighlight">' + dataArr[i].date + '</span><pre>' + dataArr[i].content + '</pre></div>';
             }
             rebuiltTab += '<button id="' + noteKind + '" class="addNote topcoat-button">+</button>';
             //update tab contents:
             $('#tab' + noteKind).html('');
             $(rebuiltTab).appendTo($('#tab' + noteKind));
+            //update tab name with note count
+            if (noteCount > 0) {
+                $('#' + noteKind + 'TabLbl').text(noteKind + ' (' + noteCount + ')');
+            } else {
+                $('#' + noteKind + 'TabLbl').text(noteKind);
+            }
         } else {
             console.log(dataArr);
             $('#notifierText').text('The database server encountered an error.');
             $('#notifier').show();
         }
     }
-
-    noteGet('CUS01', undefined, undefined, function (data) {
-        refreshTab('Customer', data);
-    });
-    noteGet('CUS01', 98765, undefined, function (data) {
-        refreshTab('Job', data);
-    });
-    noteGet('CUS01', 98765, 123456, function (data) {
-        refreshTab('Item', data);
-    });
     
-    /*
-    $("#send_text").click(function () {
-        console.log("ok");
-        var theText = $('#toSend').val();
-        console.log(theText);
-        $.get('http://digital:8080', {text: theText}, function (data) {
-            console.log('success');
-            console.log(data);
-            $('#theResult').html(data);
-        }).fail(function () {
-            $('#theResult').html('error');
-            console.log('fail');
+    function setUserID(uid, storeBool) {
+        userID = uid;
+        $('#currentID').text(uid);
+        if (storeBool) {localStorage.setItem("userid", uid); }
+        console.log('User ID set to ' + uid);
+        
+        noteGet('CUS01', undefined, undefined, function (data) {
+            refreshTab('Customer', data);
         });
-    });
-    */
-    
-	$('ul.tabs li').click(function () {
-        $(this).find('button').blur();
-		var tab_id = $(this).attr('data-tab');
-        console.log('tab_id' + tab_id);
-		$('ul.tabs li').removeClass('current');
-		$('.tab-content').removeClass('current');
-		$(this).addClass('current');
-		$("#" + tab_id).addClass('current');
-	});
-    
-    // format addNote ui by button pressed
-    var noteKind;
-    $('#noteDisplay').on('click', '.addNote', function () {
-        noteKind = this.id; // Customer, Job or Item
-        $('#addNote').text('Add ' + noteKind + ' Note');
-        $('#noteDisplay').hide();
-        $('#newNoteUI').show();
-        $('#newNote').focus();
-    });
-    
-    $('#noteDisplay.note').on('click', 'button', function () {
-        console.log('x button clicked:' + this.id);
-        var noteID = "";
-    });
+        noteGet('CUS01', 98765, undefined, function (data) {
+            refreshTab('Job', data);
+        });
+        noteGet('CUS01', 98765, 123456, function (data) {
+            refreshTab('Item', data);
+        });
+    }
     
     function closeNotifier() {
         $('#notifier').hide();
@@ -160,6 +100,124 @@ $(document).ready(function () {
         var d = new Date();
         return d.toLocaleString();
     }
+    
+    // action taken when active doc changes
+    function onDocActivated(event) {
+        var customer, job, item;
+        
+        //parse info from data
+        var url = decodeURIComponent($(event.data).find("url").text());
+        console.log('doc activated:' + url);
+        var name = $(event.data).find("name").text();
+        
+        if (url === '' || url === name) {
+            console.log('url undefined/not saved');
+            
+            $('#tabCustomer').html('');
+            $('Customer Notes Unavailable').appendTo($('#tabCustomer'));
+            $('#tabJob').html('');
+            $('Job Notes Unavailable').appendTo($('#tabJob'));
+            $('#tabItem').html('');
+            $('Item Notes Unavailable').appendTo($('#tabItem'));
+            //reset tab counts
+            $('#CustomerTabLbl').text('Customer');
+            $('#JobTabLbl').text('Job');
+            $('#ItemTabLbl').text('Item');
+            return;
+        }
+        
+        if (name.match(fileNameRegex)) {
+            //filename matches Item format, get Job# & Item#
+            console.log('url file matched!');
+            job = name.substr(0, 5);
+            console.log('job' + name);
+            item = name.split('-', 3)[1];
+            console.log('item:' + name);
+        }
+        
+        if (url.match(urlFolderRegex)) {
+            //doc url matches Job folder format, get customer# from .xml?
+            console.log('url folder matched!');
+            //job = 
+        }
+        
+        
+        
+        
+            
+        if (job === undefined && item === undefined) {
+            console.log('url non-standard');
+            
+        }
+              
+        noteGet('CUS01', undefined, undefined, function (data) {
+            refreshTab('Customer', data);
+        });
+        noteGet('CUS01', 98765, undefined, function (data) {
+            refreshTab('Job', data);
+        });
+        noteGet('CUS01', 98765, 123456, function (data) {
+            refreshTab('Item', data);
+        });
+    }
+    
+    //////////////////////////////////
+    
+    $('#setUserID').click(function () {
+        setUserID($('#userID').val(), true);
+        $('#getUserID').hide();
+        $('#noteDisplay').show();
+	});
+    
+    $('#currentID').click(function () {
+        $('#noteDisplay').hide();
+        $('#getUserID').show();
+        $('#userID').focus();
+    });
+    
+	$('ul.tabs li').click(function () {
+        $(this).find('button').blur();
+		var tab_id = $(this).attr('data-tab');
+        //console.log('tab_id' + tab_id);
+		$('ul.tabs li').removeClass('current');
+		$('.tab-content').removeClass('current');
+		$(this).addClass('current');
+		$("#" + tab_id).addClass('current');
+	});
+    
+    // format addNote ui by button pressed
+    $('#noteDisplay').on('click', '.addNote', function () {
+        var noteKind = this.id; // Customer, Job or Item 
+        //console.log('format addNote ui by button pressed, noteKind:' + noteKind);
+        $('#addNote').text('Add ' + noteKind + ' Note');
+        $('#addNote').attr('kind', noteKind);
+        $('#noteDisplay').hide();
+        $('#newNoteUI').show();
+        $('#newNote').focus();
+    });
+    
+    // remove a note
+    $('#noteDisplay').on('click', '.note button', function () {
+        var noteID = this.id;
+        console.log('x button clicked:' + noteID);
+        
+        $.get('http://digital:8080/notedelete', {id: noteID}, function (data) {
+            //response should be json object of all notes for tab, or 'error'
+            if (data !== 'error') {
+                refreshTab($('#' + noteID).attr('kind'), data);
+                closeAddNote();
+            } else {
+                //display error...
+                console.log(data);
+                $('#notifierText').text('The database server encountered an error.');
+                $('#notifier').show();
+            }
+        }).fail(function () {
+            console.log('noteDisplay failed');
+            $('#notifierText').text('There was a problem deleting your note.');
+            $('#notifier').show();
+        });
+    });
 
     $('#addNote').click(function () {
         closeNotifier();
@@ -175,6 +233,7 @@ $(document).ready(function () {
         deleted: bool, has the note been removed, default false
         */
         
+        var noteKind = $(this).attr('kind');
         var theCustomer = 'CUS01'; // all notes require customer
         var theJob; // Job & Item notes require job
         var theItem; // only Item notes use item
@@ -200,7 +259,7 @@ $(document).ready(function () {
                 $('#notifier').show();
             }
         }).fail(function () {
-            console.log('fail');
+            console.log('addNote failed');
             $('#notifierText').text('There was a problem saving your note.');
             $('#notifier').show();
         });
@@ -214,4 +273,34 @@ $(document).ready(function () {
         closeNotifier();
     });
 
+    
+    //////////////////////////////////
+    
+    //themeManager:
+    init();
+    
+    //listen for ai document activations
+    csInterface.addEventListener("documentAfterActivate", onDocActivated);
+    
+    // get and set userID
+    // info stored in localStorage, on mac: ~/library/Caches/CSXS/cep_cache
+    if (typeof (Storage) !== "undefined") {
+        if (localStorage.getItem("userid") === null) {
+            console.log('need user ID');
+            $('#noteDisplay').hide();
+            $('#getUserID').show();
+        } else {
+            setUserID(localStorage.userid, false);
+        }
+    } else {
+        console.log('Sorry! No Web Storage support...');
+        setUserID('??', false);
+    }
+    
+    /*
+    
+    csInterface.evalScript('docURL()');
+    
+    */
+    
 });

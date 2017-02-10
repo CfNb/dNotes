@@ -35,6 +35,13 @@ by the settings of the CC application
 .hostElt{}
 
 
+pre {
+    display: inherit;
+    font-family: inherit;
+    margin: inherit;
+    white-space: pre-wrap;
+}
+
 .hostButton {
     border:1px solid;
     border-radius:2px;
@@ -60,6 +67,10 @@ ul.tabs li {
     color: #222;
     display: inline-block;
     cursor: pointer;
+}
+
+ul.tabs li button {
+    overflow: visible;    
 }
 
 ul.tabs li.current button {

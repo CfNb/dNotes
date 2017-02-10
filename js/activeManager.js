@@ -24,7 +24,7 @@ var activeManager = (function () {
             console.log(event.data);
             
             /*
-            event.date=
+            event.data=
             <documentAfterActivate>
                 <url>file:///Volumes/Jobs/104491-Creative%20Instinct-Mythical%20Creatures%20Card%20Wrapper/Indigo%20-%20Job%20104491/104491-01-67572-P1.ai</url>
                 <name>104491-01-67572-P1.ai</name>
