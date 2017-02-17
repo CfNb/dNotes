@@ -9,17 +9,47 @@ $(document).ready(function () {
     var userID;
     //var urlFullRegex = new RegExp(/^file:\/\/\/Volumes\/.*\/\d{6}-.*-.*\/Indigo - Job \d{6}\/\d{6}-\d{1,2}-\d{5}.{0,3}\.ai$/);
     var urlFolderRegex = new RegExp(/^file:\/\/\/Volumes\/.*\/\d{6}-.*-.*\/Indigo - Job \d{6}\/.*\.ai$/);
+    var urlGtGFolderRegex = new RegExp(/^file:\/\/\/Volumes\/Jobs\/99999-Quotes\/G\d{4}-.*-.*\/Indigo - Job G\d{4}\/.*\.ai$/);
     var fileNameRegex = new RegExp(/^\d{6}-\d{1,2}(_\d{1,2}|)-\d{5}(_.+|)-[PJV]\d{1,2}\.(ai|pdf)$/);
+    
+    var name, customer, job, item, url; //current file info, set by onDocActivated
+    
+    var idToDelete; //note id to be deleted, set on xbutton click
+    
+    var custUnavailMsg = '<div class="disabled"><span class="noteHighlight pad">Customer Notes Unavailable</span>';
+    custUnavailMsg += 'The active file must be saved in a valid Job or GtG Folder to enable Customer Notes.</div>';
+    var jobUnavailMsg = '<div class="disabled"><span class="noteHighlight pad">Job Notes Unavailable</span>';
+    jobUnavailMsg += 'The active file must be saved in a valid Job or GtG Folder to enable Job Notes.</div>';
+    var itemUnavailMsg = '<div class="disabled"><span class="noteHighlight pad">Item Notes Unavailable</span>';
+    itemUnavailMsg += 'The active file must have a standard format file name and be saved in a valid Job Folder to enable Item Notes.</div>';
     
     function init() {
         themeManager.init();
     }
     
-    //send get request with identifiers to server, get notes back
+    // set notes ui to unavail.
+    function notesUnavailable() {
+        $('#tabCustomer').html(custUnavailMsg);
+        $('#CustomerTabLbl').prop('disabled', true);
+        $('#tabJob').html(jobUnavailMsg);
+        $('#JobTabLbl').prop('disabled', true);
+        $('#tabItem').html(itemUnavailMsg);
+        $('#ItemTabLbl').prop('disabled', true);
+        //reset tab counts
+        $('#CustomerTabLbl').text('Customer');
+        $('#JobTabLbl').text('Job');
+        $('#ItemTabLbl').text('Item');
+    }
+    
+    //send get request with identifiers to server, get note array back
     function noteGet(customer, job, item, callback) {
+        if (customer === undefined && job === undefined && item === undefined) {
+            console.log('notes unavailable');
+            notesUnavailable();
+            return 'unavailable';
+        }
+        
         $.get('http://digital:8080/noteget', {customer: customer, job: job, item: item}, function (data) {
-            console.log('noteGet:success');
-            //console.log(data);
             callback(data);
         }).fail(function () {
             $('#theResult').html('error');
@@ -42,18 +72,40 @@ $(document).ready(function () {
     function refreshTab(noteKind, dataArr) {
         console.log('refreshTab-');
         console.log('noteKind: ' + noteKind);
+        if (dataArr === 'unavailable') {
+            return;
+        }
+        
         if (dataArr !== 'error') {
             var rebuiltTab = '';
             var i;
             var noteCount = dataArr.length;
             for (i = 0; i < noteCount; i++) {
-                rebuiltTab += '<div class="note">' + xButton(dataArr[i].author, noteKind, dataArr[i]._id);
-                rebuiltTab += '<span class="noteHighlight">' + dataArr[i].date + '</span><pre>' + dataArr[i].content + '</pre></div>';
+                rebuiltTab += '<div class="note">';
+                rebuiltTab += xButton(dataArr[i].author, noteKind, dataArr[i]._id);
+                rebuiltTab += '<span class="noteHighlight">' + dataArr[i].date + '</span>';
+                rebuiltTab += '<span class="noteHighlight">' + dataArr[i].filename + '</span>';
+                rebuiltTab += '<pre>' + dataArr[i].content + '</pre></div>';
             }
-            rebuiltTab += '<button id="' + noteKind + '" class="addNote topcoat-button">+</button>';
+            rebuiltTab += '<button id="' + noteKind;
+            rebuiltTab += '" class="addNote topcoat-button">+</button>';
+            
+            switch (noteKind) {
+            case 'Customer':
+                rebuiltTab += '<div class="noteHighlight lrg">' + customer + '</div>';
+                break;
+            case 'Job':
+                rebuiltTab += '<div class="noteHighlight lrg">' + job + '</div>';
+                break;
+            case 'Item':
+                rebuiltTab += '<div class="noteHighlight lrg">' + item + '</div>';
+                break;
+            }
+            
             //update tab contents:
             $('#tab' + noteKind).html('');
             $(rebuiltTab).appendTo($('#tab' + noteKind));
+            
             //update tab name with note count
             if (noteCount > 0) {
                 $('#' + noteKind + 'TabLbl').text(noteKind + ' (' + noteCount + ')');
@@ -73,13 +125,13 @@ $(document).ready(function () {
         if (storeBool) {localStorage.setItem("userid", uid); }
         console.log('User ID set to ' + uid);
         
-        noteGet('CUS01', undefined, undefined, function (data) {
+        noteGet(customer, undefined, undefined, function (data) {
             refreshTab('Customer', data);
         });
-        noteGet('CUS01', 98765, undefined, function (data) {
+        noteGet(customer, job, undefined, function (data) {
             refreshTab('Job', data);
         });
-        noteGet('CUS01', 98765, 123456, function (data) {
+        noteGet(customer, job, item, function (data) {
             refreshTab('Item', data);
         });
     }
@@ -101,64 +153,100 @@ $(document).ready(function () {
         return d.toLocaleString();
     }
     
+    
+    function onDocSaved(event) {
+        console.log('doc saved');
+        console.log(event.data);
+    }
+    
+    function onDocDeactivated(event) {
+        customer = undefined;
+        job = undefined;
+        item = undefined;
+    }
+        
     // action taken when active doc changes
     function onDocActivated(event) {
-        var customer, job, item;
-        
         //parse info from data
-        var url = decodeURIComponent($(event.data).find("url").text());
-        console.log('doc activated:' + url);
-        var name = $(event.data).find("name").text();
+        url = decodeURIComponent($(event.data).find("url").text());
+        name = $(event.data).find("name").text();
         
         if (url === '' || url === name) {
-            console.log('url undefined/not saved');
-            
-            $('#tabCustomer').html('');
-            $('Customer Notes Unavailable').appendTo($('#tabCustomer'));
-            $('#tabJob').html('');
-            $('Job Notes Unavailable').appendTo($('#tabJob'));
-            $('#tabItem').html('');
-            $('Item Notes Unavailable').appendTo($('#tabItem'));
-            //reset tab counts
-            $('#CustomerTabLbl').text('Customer');
-            $('#JobTabLbl').text('Job');
-            $('#ItemTabLbl').text('Item');
+            notesUnavailable();
             return;
         }
         
+        var getItem = false;
+        var getJob = false;
+        
         if (name.match(fileNameRegex)) {
             //filename matches Item format, get Job# & Item#
-            console.log('url file matched!');
-            job = name.substr(0, 5);
-            console.log('job' + name);
-            item = name.split('-', 3)[1];
-            console.log('item:' + name);
+            job = name.substr(0, 6);
+            item = name.split('-', 3)[2];
+            $('#ItemTabLbl').prop('disabled', false);
+            getItem = true;
+        } else {
+            $('#ItemTabLbl').prop('disabled', true);
+            $('#tabItem').html(itemUnavailMsg);
         }
         
+        var urlJob;
         if (url.match(urlFolderRegex)) {
-            //doc url matches Job folder format, get customer# from .xml?
-            console.log('url folder matched!');
-            //job = 
-        }
-        
-        
-        
-        
+            //doc url matches Job folder format
+            //get job from url
+            urlJob = url.split('-')[0].slice(-6);
+            //get customer name from url
+            customer = url.split('-')[1];
             
-        if (job === undefined && item === undefined) {
-            console.log('url non-standard');
+            if (job === undefined) {
+                job = urlJob;
+            } else if (job !== urlJob) {
+                console.log('job string mismatch');
+                //throw error!
+            }
             
+            getJob = true;
+            $('#CustomerTabLbl').prop('disabled', false);
+            $('#JobTabLbl').prop('disabled', false);
+            
+        } else if (url.match(urlGtGFolderRegex)) {
+            //doc url matches GtG folder format
+            console.log('url GtG folder matched!');
+            var gtgFolder = url.split('/')[6];
+            urlJob = gtgFolder.split('-')[0];
+            console.log('GtG urlJob:' + urlJob);
+            customer = gtgFolder.split('-')[1];
+            console.log('GtG customer:' + customer);
+            
+            if (job === undefined) {
+                job = urlJob;
+            } else if (job !== urlJob) {
+                console.log('job string mismatch');
+                //throw error!
+            }
+            
+            getJob = true;
+            $('#CustomerTabLbl').prop('disabled', false);
+            $('#JobTabLbl').prop('disabled', false);
         }
-              
-        noteGet('CUS01', undefined, undefined, function (data) {
+
+        // always run noteGet for customer, all undefined sets notes unavailable
+        noteGet(customer, undefined, undefined, function (data) {
             refreshTab('Customer', data);
         });
-        noteGet('CUS01', 98765, undefined, function (data) {
-            refreshTab('Job', data);
-        });
-        noteGet('CUS01', 98765, 123456, function (data) {
-            refreshTab('Item', data);
-        });
+        
+        if (getJob) {
+            noteGet(customer, job, undefined, function (data) {
+                refreshTab('Job', data);
+            });
+        }
+        
+        if (getItem) {
+            noteGet(customer, job, item, function (data) {
+                refreshTab('Item', data);
+            });
+        }
+
     }
     
     //////////////////////////////////
@@ -198,26 +286,43 @@ $(document).ready(function () {
     
     // remove a note
     $('#noteDisplay').on('click', '.note button', function () {
-        var noteID = this.id;
-        console.log('x button clicked:' + noteID);
+        idToDelete = this.id;
+        console.log('x button clicked:' + idToDelete);
+        $('#confirmationText').text('Delete this Note?');
+        $('#confirmation').show();
+    });
+    
+    $('#deny').click(function () {
+        idToDelete = undefined;
+        $('#confirmation').hide();
+    });
         
-        $.get('http://digital:8080/notedelete', {id: noteID}, function (data) {
+    $('#confirm').click(function () {
+        console.log('confrimed deletion ' + idToDelete);
+        $.get('http://digital:8080/notedelete', {id: idToDelete}, function (data) {
             //response should be json object of all notes for tab, or 'error'
             if (data !== 'error') {
-                refreshTab($('#' + noteID).attr('kind'), data);
-                closeAddNote();
+                console.log('note deleted, refresh ' + $('#' + idToDelete).attr('kind'));
+                refreshTab($('#' + idToDelete).attr('kind'), data);
+                idToDelete = undefined;
+                $('#confirmation').hide();
             } else {
                 //display error...
                 console.log(data);
                 $('#notifierText').text('The database server encountered an error.');
                 $('#notifier').show();
+                idToDelete = undefined;
+                $('#confirmation').hide();
             }
         }).fail(function () {
             console.log('noteDisplay failed');
             $('#notifierText').text('There was a problem deleting your note.');
             $('#notifier').show();
+            idToDelete = undefined;
+            $('#confirmation').hide();
         });
     });
+    
 
     $('#addNote').click(function () {
         closeNotifier();
@@ -227,26 +332,25 @@ $(document).ready(function () {
         job: job #, undefined for Customer Notes
         item: item #, undefined for Job Notes
         author: initials, stored in localstorage and userID var
-        stage: job stage determined by file URL; GTG, Preflight, Proof #1, Job, etc.
+        filename: name of file at time of note creation
         date: current date object, when note was created
         content: user entered text
         deleted: bool, has the note been removed, default false
         */
         
         var noteKind = $(this).attr('kind');
-        var theCustomer = 'CUS01'; // all notes require customer
+        var theCustomer = customer; // all notes require customer
         var theJob; // Job & Item notes require job
         var theItem; // only Item notes use item
 
         if (noteKind === "Item") {
-            theJob = 98765;
-            theItem = 123456;
+            theJob = job;
+            theItem = item;
         } else if (noteKind === "Job") {
-            theJob = 98765;
+            theJob = job;
         }
-        var theStage = 'Proof #1';
 
-        $.get('http://digital:8080/notesend', {customer: theCustomer, job: theJob, item: theItem, author: userID, stage: theStage, date: getDate(), content: $('#newNote').val()}, function (data) {
+        $.get('http://digital:8080/notesend', {customer: theCustomer, job: theJob, item: theItem, author: userID, filename: name, date: getDate(), content: $('#newNote').val()}, function (data) {
             console.log(data);
             //response should be json object of all notes for tab, or 'error'
             if (data !== 'error') {
@@ -279,8 +383,15 @@ $(document).ready(function () {
     //themeManager:
     init();
     
+    //listen for ai document deactivations
+    csInterface.addEventListener("documentAfterDeactivate", onDocDeactivated);
+    
     //listen for ai document activations
     csInterface.addEventListener("documentAfterActivate", onDocActivated);
+    
+    //listen for ai document save
+    //csInterface.addEventListener("documentAfterSave", onDocSaved);
+    
     
     // get and set userID
     // info stored in localStorage, on mac: ~/library/Caches/CSXS/cep_cache

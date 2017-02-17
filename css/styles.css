@@ -55,6 +55,26 @@ pre {
 .noteHighlight {
     color: whitesmoke;
     display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.noteHighlight.lrg {
+    color: #c6c8c8;
+    padding-top: 4px;
+    text-align: right;
+    font-size: 9pt;   
+}
+
+.noteHighlight.pad {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.disabled {
+    opacity: .3;
+    text-align: center;
 }
 
 ul.tabs {
@@ -157,15 +177,15 @@ ul.tabs li.current button {
     right: 6px;
 }
 
-#notifier {
+.notifier {
     display: none;
 }
 
-#notifierText {
+.notifierText {
     font-size: 10pt;
 }
 
-#notifierClose {
+.notifierClose {
     margin-bottom: 10px;
 }
 

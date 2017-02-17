@@ -10,24 +10,6 @@
 
 <body class="hostElt">
     <div id="content">        
-        <!--
-        <div>                
-            <div>
-                <input id="toSend" type="text" name="text" style="width:96%; margin-left:2%" value="type note here">
-                
-                <button id="send_text" class="topcoat-button--cta" style="width:49%; margin-left:51%">Send to Server</button>
-                
-            </div>
-            <div style="padding-left:5px; margin-top:10px">
-                <div id="theResult" class="topcoat-notification">server response will show up here</div>
-            </div>
-        </div>  
-
-        <br />
-        <hr>
-        <br />
-        -->
-
         <div id="noteDisplay">
             <div id="notes" class="topcoat-tab-bar full">
                 <ul class="tabs full">
@@ -50,13 +32,6 @@
             <div id="tabJob" class="tab-content">
             </div>
             <div id="tabItem" class="tab-content">
-                <!--
-                <div class="note">
-                    <button class="topcoat-button--quiet xButton">X</button>
-                    <span class="noteHighlight">01/26/17 - RS</span>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                </div>
-                <button id="Item" class="addNote topcoat-button">+</button>
-                -->
             </div>
         </div>
         
@@ -72,11 +47,16 @@
             <button id="setUserID" class="topcoat-button--cta">Save ID</button>
         </div>
         
-        <div id="notifier" class="topcoat-notification dPopup">
-            <p id="notifierText"></p>
-            <button id="notifierClose" class="topcoat-button--cta">OK</button>
+        <div id="notifier" class="topcoat-notification notifier dPopup">
+            <p id="notifierText" class="notifierText"></p>
+            <button id="notifierClose" class="topcoat-button--cta notifierClose">OK</button>
         </div>
         
+        <div id="confirmation" class="topcoat-notification notifier dPopup">
+            <p id="confirmationText" class="notifierText"></p>
+            <button id="deny" class="topcoat-button--cta notifierClose">Cancel</button>
+            <button id="confirm" class="topcoat-button--cta notifierClose">OK</button>
+        </div>
 
         <!--checklist section
         
