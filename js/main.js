@@ -1,5 +1,5 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
-/*global $, window, location, CSInterface, SystemPath, themeManager, activeManager*/
+/*global $, window, location, CSInterface, SystemPath, themeManager*/
 
 $(document).ready(function () {
 	'use strict';
@@ -16,12 +16,12 @@ $(document).ready(function () {
     
     var idToDelete; //note id to be deleted, set on xbutton click
     
-    var custUnavailMsg = '<div class="disabled"><span class="noteHighlight pad">Customer Notes Unavailable</span>';
+    var custUnavailMsg = '<div class="tabdisabled"><span class="noteHighlight pad">Customer Notes Unavailable</span>';
     custUnavailMsg += 'The active file must be saved in a valid Job or GtG Folder to enable Customer Notes.</div>';
-    var jobUnavailMsg = '<div class="disabled"><span class="noteHighlight pad">Job Notes Unavailable</span>';
+    var jobUnavailMsg = '<div class="tabdisabled"><span class="noteHighlight pad">Job Notes Unavailable</span>';
     jobUnavailMsg += 'The active file must be saved in a valid Job or GtG Folder to enable Job Notes.</div>';
-    var itemUnavailMsg = '<div class="disabled"><span class="noteHighlight pad">Item Notes Unavailable</span>';
-    itemUnavailMsg += 'The active file must have a standard format file name and be saved in a valid Job Folder to enable Item Notes.</div>';
+    var itemUnavailMsg = '<div class="tabdisabled"><span class="noteHighlight pad">Item Notes Unavailable</span>';
+    itemUnavailMsg += 'The active file must have a standard file name and be saved in a valid Job Folder to enable Item Notes.</div>';
     
     function init() {
         themeManager.init();
@@ -30,15 +30,25 @@ $(document).ready(function () {
     // set notes ui to unavail.
     function notesUnavailable() {
         $('#tabCustomer').html(custUnavailMsg);
+        $('#tabCustomer').addClass('disabled');
         $('#CustomerTabLbl').prop('disabled', true);
         $('#tabJob').html(jobUnavailMsg);
+        $('#tabJob').addClass('disabled');
         $('#JobTabLbl').prop('disabled', true);
         $('#tabItem').html(itemUnavailMsg);
+        $('#tabItem').addClass('disabled');
         $('#ItemTabLbl').prop('disabled', true);
         //reset tab counts
         $('#CustomerTabLbl').text('Customer');
         $('#JobTabLbl').text('Job');
         $('#ItemTabLbl').text('Item');
+    }
+    
+    //takes file url and returns job folder url
+    function jobUrl(url) {
+        var jobPath = url.substring(7, url.indexOf('/Indigo - Job'));
+        console.log('got substring url:' + jobPath);
+        return jobPath;
     }
     
     //send get request with identifiers to server, get note array back
@@ -112,6 +122,9 @@ $(document).ready(function () {
             } else {
                 $('#' + noteKind + 'TabLbl').text(noteKind);
             }
+            
+            $('#tab' + noteKind).removeClass('disabled');
+            
         } else {
             console.log(dataArr);
             $('#notifierText').text('The database server encountered an error.');
@@ -168,7 +181,12 @@ $(document).ready(function () {
     // action taken when active doc changes
     function onDocActivated(event) {
         //parse info from data
-        url = decodeURIComponent($(event.data).find("url").text());
+        
+        console.log($(event.data).find("url").text());
+        
+        url = decodeURI($(event.data).find("url").text());
+        console.log(url);
+        
         name = $(event.data).find("name").text();
         
         if (url === '' || url === name) {
@@ -182,7 +200,7 @@ $(document).ready(function () {
         if (name.match(fileNameRegex)) {
             //filename matches Item format, get Job# & Item#
             job = name.substr(0, 6);
-            item = name.split('-', 3)[2];
+            item = name.split('-', 3)[2].substr(0, 5);
             $('#ItemTabLbl').prop('disabled', false);
             getItem = true;
         } else {
@@ -339,7 +357,7 @@ $(document).ready(function () {
         */
         
         var noteKind = $(this).attr('kind');
-        var theCustomer = customer; // all notes require customer
+        // all notes require customer
         var theJob; // Job & Item notes require job
         var theItem; // only Item notes use item
 
@@ -349,17 +367,22 @@ $(document).ready(function () {
         } else if (noteKind === "Job") {
             theJob = job;
         }
-
-        $.get('http://digital:8080/notesend', {customer: theCustomer, job: theJob, item: theItem, author: userID, filename: name, date: getDate(), content: $('#newNote').val()}, function (data) {
+        
+        console.log('the loggening!');
+        console.log(url);
+        console.log('url' + jobUrl(url));
+        console.log('sending url:' + encodeURI(jobUrl(url)));
+        
+        $.post('http://digital:8080/notesend', { url: encodeURI(jobUrl(url)), customer: customer, job: theJob, item: theItem, author: userID, filename: name, date: getDate(), content: $('#newNote').val()}, function (data) {
             console.log(data);
             //response should be json object of all notes for tab, or 'error'
-            if (data !== 'error') {
+            if (data !== 'error - customer undefined') {
                 refreshTab(noteKind, data);
                 closeAddNote();
             } else {
                 //display error...
                 console.log(data);
-                $('#notifierText').text('The database server encountered an error.');
+                $('#notifierText').text('Database Server ' + data);
                 $('#notifier').show();
             }
         }).fail(function () {

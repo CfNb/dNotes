@@ -74,6 +74,17 @@ pre {
 
 .disabled {
     opacity: .3;
+}
+
+#tabJob disabled {
+    opacity: .3;
+}
+
+#tabItem disabled {
+    opacity: .3;
+}
+
+.tabdisabled {
     text-align: center;
 }
 
