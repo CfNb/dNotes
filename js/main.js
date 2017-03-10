@@ -21,7 +21,7 @@ $(document).ready(function () {
     var jobUnavailMsg = '<div class="tabdisabled"><span class="noteHighlight pad">Job Notes Unavailable</span>';
     jobUnavailMsg += 'The active file must be saved in a valid Job or GtG Folder to enable Job Notes.</div>';
     var itemUnavailMsg = '<div class="tabdisabled"><span class="noteHighlight pad">Item Notes Unavailable</span>';
-    itemUnavailMsg += 'The active file must have a standard file name and be saved in a valid Job Folder to enable Item Notes.</div>';
+    itemUnavailMsg += 'The active file must have a standard file name and be saved in a valid Job or GtG Folder to enable Item Notes.</div>';
     
     function init() {
         themeManager.init();
@@ -47,25 +47,25 @@ $(document).ready(function () {
     //takes file url and returns job folder url
     function jobUrl(url) {
         var jobPath = url.substring(7, url.indexOf('/Indigo - Job'));
-        console.log('got substring url:' + jobPath);
+        console.log(Date() + 'got substring url:' + jobPath);
         return jobPath;
     }
     
     //send get request with identifiers to server, get note array back
-    function noteGet(customer, job, item, callback) {
+    function noteGet(customer, job, item, url, callback) {
         if (customer === undefined && job === undefined && item === undefined) {
-            console.log('notes unavailable');
+            console.log(Date() + 'notes unavailable');
             notesUnavailable();
             return 'unavailable';
         }
         
-        $.get('http://digital:8080/noteget', {customer: customer, job: job, item: item}, function (data) {
+        $.post('http://digital:8080/noteget', {customer: customer, job: job, item: item, url: jobUrl(url)}, function (data) {
             callback(data);
         }).fail(function () {
             $('#theResult').html('error');
-            console.log('noteGet failed');
-            $('#notifierText').text('Notes could not be retrieved from the server.');
-            $('#notifier').show();
+            console.log(Date() + 'noteGet failed');
+            $('#retryText').text('Notes could not be retrieved from the server.');
+            $('#retry').show();
             return 'error';
         });
     }
@@ -80,7 +80,7 @@ $(document).ready(function () {
     
     // refreshes tab content using new data
     function refreshTab(noteKind, dataArr) {
-        console.log('refreshTab-');
+        console.log(Date() + 'refreshTab-');
         console.log('noteKind: ' + noteKind);
         if (dataArr === 'unavailable') {
             return;
@@ -96,6 +96,7 @@ $(document).ready(function () {
                 rebuiltTab += '<span class="noteHighlight">' + dataArr[i].date + '</span>';
                 rebuiltTab += '<span class="noteHighlight">' + dataArr[i].filename + '</span>';
                 rebuiltTab += '<pre>' + dataArr[i].content + '</pre></div>';
+                rebuiltTab += '<hr />';
             }
             rebuiltTab += '<button id="' + noteKind;
             rebuiltTab += '" class="addNote topcoat-button">+</button>';
@@ -126,7 +127,7 @@ $(document).ready(function () {
             $('#tab' + noteKind).removeClass('disabled');
             
         } else {
-            console.log(dataArr);
+            console.log(Date() + dataArr);
             $('#notifierText').text('The database server encountered an error.');
             $('#notifier').show();
         }
@@ -136,26 +137,26 @@ $(document).ready(function () {
         userID = uid;
         $('#currentID').text(uid);
         if (storeBool) {localStorage.setItem("userid", uid); }
-        console.log('User ID set to ' + uid);
+        console.log(Date() + ' User ID set to ' + uid);
         
-        noteGet(customer, undefined, undefined, function (data) {
+        noteGet(customer, undefined, undefined, url, function (data) {
             refreshTab('Customer', data);
         });
-        noteGet(customer, job, undefined, function (data) {
+        noteGet(customer, job, undefined, url, function (data) {
             refreshTab('Job', data);
         });
-        noteGet(customer, job, item, function (data) {
+        noteGet(customer, job, item, url, function (data) {
             refreshTab('Item', data);
         });
     }
     
-    function closeNotifier() {
-        $('#notifier').hide();
-        $('#notifierText').text('');
+    function closeNotifier(divID) {
+        $('#' + divID).hide();
+        $('#' + divID + 'Text').text('');
     }
     
     function closeAddNote() {
-        closeNotifier();
+        closeNotifier('notifier');
         $('#newNoteUI').hide();
         $('#noteDisplay').show();
         $('#newNote').val('');
@@ -166,9 +167,8 @@ $(document).ready(function () {
         return d.toLocaleString();
     }
     
-    
     function onDocSaved(event) {
-        console.log('doc saved');
+        console.log(Date() + ' doc saved');
         console.log(event.data);
     }
     
@@ -180,8 +180,15 @@ $(document).ready(function () {
         
     // action taken when active doc changes
     function onDocActivated(event) {
-        //parse info from data
+        //clear notifiers
+        closeNotifier('notifier');
+        closeNotifier('retry');
+        closeNotifier('confirmation');
         
+        //cancel Add Notes
+        closeAddNote();
+        
+        //parse info from data
         console.log($(event.data).find("url").text());
         
         url = decodeURI($(event.data).find("url").text());
@@ -219,7 +226,7 @@ $(document).ready(function () {
             if (job === undefined) {
                 job = urlJob;
             } else if (job !== urlJob) {
-                console.log('job string mismatch');
+                console.log(Date() + 'job string mismatch');
                 //throw error!
             }
             
@@ -229,7 +236,7 @@ $(document).ready(function () {
             
         } else if (url.match(urlGtGFolderRegex)) {
             //doc url matches GtG folder format
-            console.log('url GtG folder matched!');
+            console.log(Date() + 'url GtG folder matched!');
             var gtgFolder = url.split('/')[6];
             urlJob = gtgFolder.split('-')[0];
             console.log('GtG urlJob:' + urlJob);
@@ -249,18 +256,18 @@ $(document).ready(function () {
         }
 
         // always run noteGet for customer, all undefined sets notes unavailable
-        noteGet(customer, undefined, undefined, function (data) {
+        noteGet(customer, undefined, undefined, url, function (data) {
             refreshTab('Customer', data);
         });
         
         if (getJob) {
-            noteGet(customer, job, undefined, function (data) {
+            noteGet(customer, job, undefined, url, function (data) {
                 refreshTab('Job', data);
             });
         }
         
         if (getItem) {
-            noteGet(customer, job, item, function (data) {
+            noteGet(customer, job, item, url, function (data) {
                 refreshTab('Item', data);
             });
         }
@@ -312,7 +319,7 @@ $(document).ready(function () {
     
     $('#deny').click(function () {
         idToDelete = undefined;
-        $('#confirmation').hide();
+        closeNotifier('confirmation');
     });
         
     $('#confirm').click(function () {
@@ -322,35 +329,33 @@ $(document).ready(function () {
             if (data !== 'error') {
                 console.log('note deleted, refresh ' + $('#' + idToDelete).attr('kind'));
                 refreshTab($('#' + idToDelete).attr('kind'), data);
-                idToDelete = undefined;
-                $('#confirmation').hide();
             } else {
                 //display error...
-                console.log(data);
+                console.log(Date() + ' ' + data);
                 $('#notifierText').text('The database server encountered an error.');
                 $('#notifier').show();
-                idToDelete = undefined;
-                $('#confirmation').hide();
             }
+            idToDelete = undefined;
+            closeNotifier('confirmation');
         }).fail(function () {
             console.log('noteDisplay failed');
             $('#notifierText').text('There was a problem deleting your note.');
             $('#notifier').show();
             idToDelete = undefined;
-            $('#confirmation').hide();
+            closeNotifier('confirmation');
         });
     });
     
 
     $('#addNote').click(function () {
-        closeNotifier();
+        closeNotifier('notifier');
 
         /* note info:
         customer: customer #
         job: job #, undefined for Customer Notes
         item: item #, undefined for Job Notes
         author: initials, stored in localstorage and userID var
-        filename: name of file at time of note creation
+        filename: name of file at time of note, filename should reveal job stage
         date: current date object, when note was created
         content: user entered text
         deleted: bool, has the note been removed, default false
@@ -370,10 +375,9 @@ $(document).ready(function () {
         
         console.log('the loggening!');
         console.log(url);
-        console.log('url' + jobUrl(url));
-        console.log('sending url:' + encodeURI(jobUrl(url)));
+        console.log('sending url:' + jobUrl(url));
         
-        $.post('http://digital:8080/notesend', { url: encodeURI(jobUrl(url)), customer: customer, job: theJob, item: theItem, author: userID, filename: name, date: getDate(), content: $('#newNote').val()}, function (data) {
+        $.post('http://digital:8080/notesend', {url: jobUrl(url), customer: customer, job: theJob, item: theItem, author: userID, filename: name, date: getDate(), content: $('#newNote').val()}, function (data) {
             console.log(data);
             //response should be json object of all notes for tab, or 'error'
             if (data !== 'error - customer undefined') {
@@ -397,7 +401,23 @@ $(document).ready(function () {
     });
         
     $('#notifierClose').click(function () {
-        closeNotifier();
+        closeNotifier('notifier');
+    });
+    
+    $('#retryButton').click(function () {
+        console.log(Date() + ' Retry');
+
+        closeNotifier('retry');
+        
+        noteGet(customer, undefined, undefined, url, function (data) {
+            refreshTab('Customer', data);
+        });
+        noteGet(customer, job, undefined, url, function (data) {
+            refreshTab('Job', data);
+        });
+        noteGet(customer, job, item, url, function (data) {
+            refreshTab('Item', data);
+        });
     });
 
     
