@@ -2,9 +2,4 @@
 /*global $, Folder*/
 
 
-//returns url of active document
-function docURL(){
-
-}
-
 

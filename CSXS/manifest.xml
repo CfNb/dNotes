@@ -31,11 +31,11 @@
 					<Geometry>
 						<Size>
 							<Height>210</Height>
-							<Width>300</Width>
+							<Width>240</Width>
 						</Size>
                         <MinSize>
                             <Height>210</Height>
-                            <Width>256</Width>
+                            <Width>240</Width>
                         </MinSize>
                         <MaxSize>
                             <Height>210</Height>
