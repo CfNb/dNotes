@@ -8,7 +8,7 @@ $(document).ready(function () {
     
     var userID;
     //var urlFullRegex = new RegExp(/^file:\/\/\/Volumes\/.*\/\d{6}-.*-.*\/Indigo - Job \d{6}\/\d{6}-\d{1,2}-\d{5}.{0,3}\.ai$/);
-    var urlFolderRegex = new RegExp(/^file:\/\/\/Volumes\/.*\/\d{6}-.*-.*\/Indigo - Job \d{6}\/.*\.ai$/);
+    var urlFolderRegex = new RegExp(/^file:\/\/\/Volumes\/Jobs(\/[^\/]*\/|\/)\d{6}-.*-.*\/Indigo - Job \d{6}\/.*\.ai$/);
     var urlGtGFolderRegex = new RegExp(/^file:\/\/\/Volumes\/Jobs\/99999-Quotes\/G\d{4}-.*-.*\/Indigo - Job G\d{4}\/.*\.ai$/);
     var fileNameRegex = new RegExp(/^\d{6}-\d{1,2}(_\d{1,2}|)-\d{5}(_.+|)-[PJV]\d{1,2}\.(ai|pdf)$/);
     
@@ -207,16 +207,23 @@ $(document).ready(function () {
         var urlJob;
         if (url.match(urlFolderRegex)) {
             //doc url matches Job folder format
+            var jobFolderName = url.split('/');
+            jobFolderName = jobFolderName[jobFolderName.length - 3];
+            
             //get job from url
-            urlJob = url.split('-')[0].slice(-6);
+            urlJob = jobFolderName.slice(0, 6);
+            //console.log(Date() + ' ' + urlJob);
+            
             //get customer name from url
-            customer = url.split('-')[1];
+            customer = jobFolderName.split('-')[1];
+            //console.log(Date() + ' ' + customer);
             
             if (job === undefined) {
                 job = urlJob;
             } else if (job !== urlJob) {
-                console.log(Date() + ' job string mismatch');
-                //throw error!
+                console.log(Date() + ' job string mismatch: ' + job + 'vs' + urlJob);
+                notesUnavailable();
+                return;
             }
             
             getJob = true;
@@ -405,18 +412,6 @@ $(document).ready(function () {
         closeNotifier('retry');
         
         onDocActivated('');
-        
-        /*
-        noteGet(customer, undefined, undefined, url, function (data) {
-            refreshTab('Customer', data);
-        });
-        noteGet(customer, job, undefined, url, function (data) {
-            refreshTab('Job', data);
-        });
-        noteGet(customer, job, item, url, function (data) {
-            refreshTab('Item', data);
-        });
-        */
     });
 
     
