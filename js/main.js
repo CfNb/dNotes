@@ -8,7 +8,7 @@ $(document).ready(function () {
     
     var userID;
     //var urlFullRegex = new RegExp(/^file:\/\/\/Volumes\/.*\/\d{6}-.*-.*\/Indigo - Job \d{6}\/\d{6}-\d{1,2}-\d{5}.{0,3}\.ai$/);
-    var urlFolderRegex = new RegExp(/^file:\/\/\/Volumes\/Jobs(\/[^\/]*\/|\/)\d{6}-.*-.*\/Indigo - Job \d{6}\/.*\.ai$/);
+    var urlFolderRegex = new RegExp(/^file:\/\/\/Volumes\/Jobs(\/[^\/]*\/|\/)\d{6}-.*-.*\/Indigo - Job \d{6}\/[^\/]*\.ai$/);
     var urlGtGFolderRegex = new RegExp(/^file:\/\/\/Volumes\/Jobs\/99999-Quotes\/G\d{4}-.*-.*\/Indigo - Job G\d{4}\/.*\.ai$/);
     var fileNameRegex = new RegExp(/^\d{6}-\d{1,2}(_\d{1,2}|)-\d{5}(_.+|)-[PJV]\d{1,2}\.(ai|pdf)$/);
     
@@ -221,7 +221,7 @@ $(document).ready(function () {
             if (job === undefined) {
                 job = urlJob;
             } else if (job !== urlJob) {
-                console.log(Date() + ' job string mismatch: ' + job + 'vs' + urlJob);
+                console.log(Date() + ' Job Folder job string mismatch: ' + job + 'vs' + urlJob);
                 notesUnavailable();
                 return;
             }
@@ -239,8 +239,8 @@ $(document).ready(function () {
             if (job === undefined) {
                 job = urlJob;
             } else if (job !== urlJob) {
-                console.log(Date() + ' job string mismatch');
-                //throw error!
+                console.log(Date() + ' GtG job string mismatch: ' + job + 'vs' + urlJob);
+                job = urlJob; //folder overrides file name
             }
             
             //update name with GtG# ref if needed
@@ -249,6 +249,8 @@ $(document).ready(function () {
             }
             
             getJob = true;
+            getItem = false; // item notes are unavailable on GtG jobs
+            
             $('#CustomerTabLbl').prop('disabled', false);
             $('#JobTabLbl').prop('disabled', false);
         }
