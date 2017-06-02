@@ -176,7 +176,36 @@ $(document).ready(function () {
     }
         
     // action taken when active doc changes, call passing in '' to rerun with current vars(retry)
+    // also called by window.load function on startup 
     function onDocActivated(event) {
+        
+        /*
+        Can notes be retrieved without event.data info?
+        Opening ai by double clicking ai doc does not register event?
+        is there a way to activate document on page load(ai open, if doc then activate?)
+        otherwise, on page load, if doc open, get info in alternate way and pass to onDocActivated function...
+        
+        
+        if (event === '') {
+            //either called on ai open, or on retry
+            //check if doc is open
+            csInterface.evalScript('docIsOpen()', function (res) {
+                console.log("the result: " + res);
+                if (res === 'true') {
+                    
+                } else {
+                    
+                }
+            });
+            return;
+        } else {
+            //
+        }
+        
+        
+        */
+        
+        
         
         if (event !== '') {
             //get info from active document
@@ -431,6 +460,10 @@ $(document).ready(function () {
     //listen for ai document save
     //csInterface.addEventListener("documentAfterSave", onDocSaved);
     
+    $(window).load(function () {
+        console.log(Date() + ' window loaded');
+        onDocActivated('');
+    });
     
     // get and set userID
     // info stored in localStorage, on mac: ~/library/Caches/CSXS/cep_cache

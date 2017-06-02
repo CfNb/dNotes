@@ -1,0 +1,9 @@
+////////////////////////////////
+//    |) Notes Change Log    //
+////////////////////////////////
+
+06/??/17 v1.0.1
+    + modified to refresh in more situations, like opening ai app by double clicking file
+
+03/29/17 v1.0.0
+    - Initial release
