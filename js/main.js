@@ -178,40 +178,24 @@ $(document).ready(function () {
     // action taken when active doc changes, call passing in '' to rerun with current vars(retry)
     // also called by window.load function on startup 
     function onDocActivated(event) {
+        console.log('onDocActivated called');
         
-        /*
-        Can notes be retrieved without event.data info?
-        Opening ai by double clicking ai doc does not register event?
-        is there a way to activate document on page load(ai open, if doc then activate?)
-        otherwise, on page load, if doc open, get info in alternate way and pass to onDocActivated function...
+        console.log(event);
         
-        
-        if (event === '') {
-            //either called on ai open, or on retry
-            //check if doc is open
-            csInterface.evalScript('docIsOpen()', function (res) {
-                console.log("the result: " + res);
-                if (res === 'true') {
-                    
-                } else {
-                    
-                }
-            });
-            return;
-        } else {
-            //
-        }
-        
-        
-        */
-        
-        
-        
-        if (event !== '') {
-            //get info from active document
+        if (event.constructor === Array) {
+            //ai opened by opening a file
+            console.log("event passed to onDocActivated is array");
+            url = event[0];
+            console.log('url:' + url);
+            name = event[1];
+            console.log('name:' + name);
+        } else if (event !== '') {
+            //if event was '' the retry button was pushed
+            //get info from documentAfterActivate event
             url = decodeURI($(event.data).find("url").text());
-
+            console.log('url:' + url);
             name = $(event.data).find("name").text();
+            console.log('name:' + name);
         }
             
         if (url === '' || url === name) {
@@ -444,7 +428,6 @@ $(document).ready(function () {
         
         onDocActivated('');
     });
-
     
     //////////////////////////////////
     
@@ -462,7 +445,22 @@ $(document).ready(function () {
     
     $(window).load(function () {
         console.log(Date() + ' window loaded');
-        onDocActivated('');
+        
+        // if ai opened by doubleclicking file, received 'documentAfterActivate' event will not contain relevent info
+        // if doc open on window load, get relevent info & get notes
+        csInterface.evalScript('docIsOpen()', function (res) {
+            console.log("the result: " + res);
+            if (res === 'true') {
+                csInterface.evalScript('getURLandName()', function (res) {
+                    console.log(res);
+            
+                    res = JSON.parse(res);
+        
+                    console.log("the refresh result: " + res[0] + "  " + res[1]);
+                    onDocActivated(res);
+                });
+            }
+        });
     });
     
     // get and set userID
