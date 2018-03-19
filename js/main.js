@@ -1,4 +1,4 @@
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 2, maxerr: 50 */
 /*global $, window, location, CSInterface, SystemPath, themeManager*/
 
 $(document).ready(function () {
@@ -299,20 +299,20 @@ $(document).ready(function () {
     
     //////////////////////////////////
     
-    $('#setUserID').click(function () {
-        setUserID($('#userID').val(), true);
-        $('#getUserID').hide();
-        $('#noteDisplay').show();
+  $('#setUserID').click(function () {
+		setUserID($('#userID').val(), true);
+		$('#getUserID').hide();
+		$('#noteDisplay').show();
 	});
     
-    $('#currentID').click(function () {
-        $('#noteDisplay').hide();
-        $('#getUserID').show();
-        $('#userID').focus();
-    });
+	$('#currentID').click(function () {
+		$('#noteDisplay').hide();
+		$('#getUserID').show();
+		$('#userID').focus();
+	});
     
 	$('ul.tabs li').click(function () {
-        $(this).find('button').blur();
+    $(this).find('button').blur();
 		var tab_id = $(this).attr('data-tab');
 		$('ul.tabs li').removeClass('current');
 		$('.tab-content').removeClass('current');
